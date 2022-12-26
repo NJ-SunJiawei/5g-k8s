@@ -1,0 +1,193 @@
+version: '3'
+
+services:
+  cnrun0:
+    image: oset-env-base:ubuntu20.04
+    container_name: sset-cn-bridge-${CN_IP0}
+    env_file:
+      - sset.env
+    volumes:
+      - ./step02-sset/in:/home/cn
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    expose:
+      - "3868/udp"
+      - "3868/tcp"
+      - "3868/sctp"
+      - "5868/udp"
+      - "5868/tcp"
+      - "5868/sctp"
+      - "8805/udp"
+      - "2123/udp"
+      - "7777/tcp"
+      - "2152/udp"
+      - "38412/sctp"
+    # ports:
+    #   - "2152:2152/udp"
+    #   - "38412:38412/sctp"
+    cap_add:
+      - NET_ADMIN
+    privileged: true
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv6.conf.all.disable_ipv6=0
+    #devices:
+    #  - "/dev/net/tun:/dev/net/tun"
+    command: /bin/bash -c "dpkg -i /home/cn/sset_install/oset/*.deb; dpkg -i /home/cn/sset_install/sset/5gcn/nonacos/*.deb; /bin/bash /home/cn/sset_5g_core_local_install.sh ${CN_IP0} ${UPF_SUB4_IP0} ${UPF_SUB6_IP0}; /bin/bash /home/cn/sset_5g_network.sh  ${UPF_SUB4_IP0} ${UPF_SUB6_IP0}; /bin/bash /home/cn/sset_5g_core_tools.sh 5gcDocker"
+    networks:
+      default:
+        ipv4_address: ${CN_IP0}
+        
+  cnrun1:
+    image: oset-env-base:ubuntu20.04
+    container_name: sset-cn-bridge-${CN_IP1}
+    env_file:
+      - sset.env
+    volumes:
+      - ./step02-sset/in:/home/cn
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    expose:
+      - "3868/udp"
+      - "3868/tcp"
+      - "3868/sctp"
+      - "5868/udp"
+      - "5868/tcp"
+      - "5868/sctp"
+      - "8805/udp"
+      - "2123/udp"
+      - "7777/tcp"
+      - "2152/udp"
+      - "38412/sctp"
+    # ports:
+    #   - "2152:2152/udp"
+    #   - "38412:38412/sctp"
+    cap_add:
+      - NET_ADMIN
+    privileged: true
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv6.conf.all.disable_ipv6=0
+    #devices:
+    #  - "/dev/net/tun:/dev/net/tun"
+    command: /bin/bash -c "dpkg -i /home/cn/sset_install/oset/*.deb; dpkg -i /home/cn/sset_install/sset/5gcn/nonacos/*.deb; /bin/bash /home/cn/sset_5g_core_local_install.sh ${CN_IP1}  ${UPF_SUB4_IP1} ${UPF_SUB6_IP1}; /bin/bash /home/cn/sset_5g_network.sh  ${UPF_SUB4_IP1} ${UPF_SUB6_IP1}; /bin/bash /home/cn/sset_5g_core_tools.sh 5gcDocker"
+    networks:
+      default:
+        ipv4_address: ${CN_IP1}
+        
+  cnrun2:
+    image: oset-env-base:ubuntu20.04
+    container_name: sset-cn-bridge-${CN_IP2}
+    env_file:
+      - sset.env
+    volumes:
+      - ./step02-sset/in:/home/cn
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    expose:
+      - "3868/udp"
+      - "3868/tcp"
+      - "3868/sctp"
+      - "5868/udp"
+      - "5868/tcp"
+      - "5868/sctp"
+      - "8805/udp"
+      - "2123/udp"
+      - "7777/tcp"
+      - "2152/udp"
+      - "38412/sctp"
+    # ports:
+    #   - "2152:2152/udp"
+    #   - "38412:38412/sctp"
+    cap_add:
+      - NET_ADMIN
+    privileged: true
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv6.conf.all.disable_ipv6=0
+    #devices:
+    #  - "/dev/net/tun:/dev/net/tun"
+    command: /bin/bash -c "dpkg -i /home/cn/sset_install/oset/*.deb; dpkg -i /home/cn/sset_install/sset/5gcn/nonacos/*.deb; /bin/bash /home/cn/sset_5g_core_local_install.sh ${CN_IP2} ${UPF_SUB4_IP2} ${UPF_SUB6_IP2}; /bin/bash /home/cn/sset_5g_network.sh ${UPF_SUB4_IP2} ${UPF_SUB6_IP2}; /bin/bash /home/cn/sset_5g_core_tools.sh 5gcDocker"
+    networks:
+      default:
+        ipv4_address: ${CN_IP2}
+
+  cnrun3:
+    image: oset-env-base:ubuntu20.04
+    container_name: sset-cn-bridge-${CN_IP3}
+    env_file:
+      - sset.env
+    volumes:
+      - ./step02-sset/in:/home/cn
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    expose:
+      - "3868/udp"
+      - "3868/tcp"
+      - "3868/sctp"
+      - "5868/udp"
+      - "5868/tcp"
+      - "5868/sctp"
+      - "8805/udp"
+      - "2123/udp"
+      - "7777/tcp"
+      - "2152/udp"
+      - "38412/sctp"
+    # ports:
+    #   - "2152:2152/udp"
+    #   - "38412:38412/sctp"
+    cap_add:
+      - NET_ADMIN
+    privileged: true
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv6.conf.all.disable_ipv6=0
+    #devices:
+    #  - "/dev/net/tun:/dev/net/tun"
+    command: /bin/bash -c "dpkg -i /home/cn/sset_install/oset/*.deb; dpkg -i /home/cn/sset_install/sset/5gcn/nonacos/*.deb; /bin/bash /home/cn/sset_5g_core_local_install.sh ${CN_IP3}  ${UPF_SUB4_IP3} ${UPF_SUB6_IP3}; /bin/bash /home/cn/sset_5g_network.sh ${UPF_SUB4_IP3} ${UPF_SUB6_IP3}; /bin/bash /home/cn/sset_5g_core_tools.sh 5gcDocker"
+    networks:
+      default:
+        ipv4_address: ${CN_IP3}
+        
+  cnrun4:
+    image: oset-env-base:ubuntu20.04
+    container_name: sset-cn-bridge-${CN_IP4}
+    env_file:
+      - sset.env
+    volumes:
+      - ./step02-sset/in:/home/cn
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    expose:
+      - "3868/udp"
+      - "3868/tcp"
+      - "3868/sctp"
+      - "5868/udp"
+      - "5868/tcp"
+      - "5868/sctp"
+      - "8805/udp"
+      - "2123/udp"
+      - "7777/tcp"
+      - "2152/udp"
+      - "38412/sctp"
+    # ports:
+    #   - "2152:2152/udp"
+    #   - "38412:38412/sctp"
+    cap_add:
+      - NET_ADMIN
+    privileged: true
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv6.conf.all.disable_ipv6=0
+    #devices:
+    #  - "/dev/net/tun:/dev/net/tun"
+    command: /bin/bash -c "dpkg -i /home/cn/sset_install/oset/*.deb; dpkg -i /home/cn/sset_install/sset/5gcn/nonacos/*.deb; /bin/bash /home/cn/sset_5g_core_local_install.sh ${CN_IP4} ${UPF_SUB4_IP4} ${UPF_SUB6_IP4}; /bin/bash /home/cn/sset_5g_network.sh ${UPF_SUB4_IP4} ${UPF_SUB6_IP4}; /bin/bash /home/cn/sset_5g_core_tools.sh 5gcDocker"
+    networks:
+      default:
+        ipv4_address: ${CN_IP4}
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: ${TEST_NETWORK}

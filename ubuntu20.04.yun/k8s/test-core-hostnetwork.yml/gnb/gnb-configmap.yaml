@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gnb-config
+  namespace: sset-5g-simulation
+  labels:
+    ngc-mode: gnb
+data:
+  gnb.yaml: |
+    mcc: '901'
+    mnc: '70'
+
+    nci: '0x0000000100'
+    idLength: 32
+    tac: 1
+
+    linkIp: gnb-svc-pool 
+    ngapIp: gnb-svc-pool 
+    gtpIp: gnb-svc-pool 
+
+    amfConfigs:
+      - address: core-node-host-pool
+        port: 38412
+
+    slices:
+      - sst: 1
+
+    ignoreStreamIds: true
+    # SSET config
+    mainctrl:
+      - address: 10.37.5.69
+        port: 1001
+
+    nacos:
+      - address: 10.37.5.69
+        cluster: 10-37-6-29
+
+    rocketmq:
+      - address: 10.37.5.69
+        port: 9876

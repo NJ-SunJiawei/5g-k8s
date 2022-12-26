@@ -1,0 +1,162 @@
+version: '3'
+
+services:
+  mongorun:
+    build: ./step01-mongo/in
+    image: mongo:ubuntu20.04
+    container_name: mongo-bridge-${MONGO_IP}
+    env_file:
+      - shanghai.env
+    volumes:
+      - ./step01-mongo/in:/mnt/mongo
+      - mongodbdata:/var/lib/mongodb
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    expose:
+      - "27017/udp"
+      - "27017/tcp"
+    #ports:
+    #  - "27017:27017"
+    networks:
+      default:
+        ipv4_address: ${MONGO_IP}
+    command: /bin/bash -c "/bin/bash /mnt/mongo/mongo_init.sh"
+    
+  webuirun:
+    build: ./step01-webui/in
+    image: webui:ubuntu20.04
+    container_name: webui-bridge-${WEBUI_IP}
+    depends_on:
+      - mongorun
+    env_file:
+      - shanghai.env
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    expose:
+      - "3000/tcp"
+    ports:
+      - "3000:3000/tcp"
+    networks:
+      default:
+        ipv4_address: ${WEBUI_IP}
+    command: /bin/bash -c "/bin/bash webui_init.sh"
+ 
+  cnrun:
+    network_mode: "host"
+    image: oset-env-base:ubuntu20.04
+    container_name: sset-cn-host
+    depends_on:
+      - mongorun
+      - webuirun
+    env_file:
+      - shanghai.env
+    volumes:
+      - ./step02-sset/in:/home/cn
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    expose:
+      - "3868/udp"
+      - "3868/tcp"
+      - "3868/sctp"
+      - "5868/udp"
+      - "5868/tcp"
+      - "5868/sctp"
+      - "8805/udp"
+      - "2123/udp"
+      - "7777/tcp"
+      - "2152/udp"
+      - "38412/sctp"
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+    devices:
+      - "/dev/net/tun:/dev/net/tun"
+    #docker v18.09 open
+    #sysctls:
+    #  - net.ipv4.ip_forward=1
+    #  - net.ipv6.conf.all.disable_ipv6=0
+    command: /bin/bash -c "dpkg -i /home/cn/sset_install/oset/*.deb; dpkg -i /home/cn/sset_install/sset/5gcn/shanghai/*.deb; /bin/bash /home/cn/sset_5g_core_local_install.sh ${HOST_IP} ${UPF_SUB4_IP} ${UPF_SUB6_IP}; /bin/bash /home/cn/sset_5g_network.sh ${UPF_SUB4_IP} ${UPF_SUB6_IP}; /bin/bash /home/cn/sset_5g_core_tools.sh 5gcDocker"
+
+
+  gnbrun0:
+    image: oset-env-base:ubuntu20.04
+    container_name: sset-gnb-bridge-${NR_GNB_IP0}
+    stdin_open: true
+    tty: true
+    env_file:
+      - shanghai.env
+    volumes:
+      - ./step02-sset/in:/home/ueran
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    expose:
+      - "38412/sctp"
+      - "2152/udp"
+      - "4997/udp"
+    cap_add:
+      - NET_ADMIN
+    privileged: true
+    depends_on:
+      - cnrun0
+    command: /bin/bash -c "dpkg -i /home/ueran/sset_install/sset/5gueran/nonacos/*.deb; /bin/bash /home/ueran/sset_5g_nr_gnb_local_install.sh ${NR_GNB_IP0} ${AMF_IP}; /bin/bash /home/ueran/sset_5g_ueran_tools.sh gnb -Y"
+    networks:
+      default:
+        ipv4_address: ${NR_GNB_IP0}
+
+  uerun0:
+    image: oset-env-base:ubuntu20.04
+    container_name: sset-ue-bridge-${NR_UE_IP0}
+    stdin_open: true
+    tty: true
+    env_file:
+      - shanghai.env
+    volumes:
+      - ./step02-sset/in:/home/ueran
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    expose:
+      - "4997/udp"
+    cap_add:
+      - NET_ADMIN
+    privileged: true
+    depends_on:
+      - gnbrun0
+    command: /bin/bash -c "dpkg -i /home/ueran/sset_install/sset/5gueran/nonacos/*.deb; /bin/bash /home/ueran/sset_5g_nr_ue_local_install.sh ${UE_IMSI0} ${NR_GNB_IP0}; /bin/bash /home/ueran/sset_5g_ueran_tools.sh ue -Y"
+    networks:
+      default:
+        ipv4_address: ${NR_UE_IP0}
+
+  uerun1:
+    image: oset-env-base:ubuntu20.04
+    container_name: sset-ue-bridge-${NR_UE_IP1}
+    stdin_open: true
+    tty: true
+    env_file:
+      - shanghai.env
+    volumes:
+      - ./step02-sset/in:/home/ueran
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    expose:
+      - "4997/udp"
+    cap_add:
+      - NET_ADMIN
+    privileged: true
+    depends_on:
+      - gnbrun0
+    command: /bin/bash -c "dpkg -i /home/ueran/sset_install/sset/5gueran/nonacos/*.deb; /bin/bash /home/ueran/sset_5g_nr_ue_local_install.sh ${UE_IMSI1} ${NR_GNB_IP0}; /bin/bash /home/ueran/sset_5g_ueran_tools.sh ue -Y"
+    networks:
+      default:
+        ipv4_address: ${NR_UE_IP1}
+
+
+volumes:
+  mongodbdata: {}
+ 
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: ${TEST_NETWORK}

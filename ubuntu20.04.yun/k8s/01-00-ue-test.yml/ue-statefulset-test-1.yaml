@@ -1,0 +1,53 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: StatefulSet 
+metadata:
+  name: ue-deploy-1
+  namespace: sset-5g-simulation
+  labels:
+    ngc-mode: ue
+spec:
+  replicas: 1
+  serviceName: "ue-svc-pool"
+  selector:
+    matchLabels:
+      ngc-mode: ue
+  template:
+    metadata:          
+      labels:
+        ngc-mode: ue
+    spec:
+      #terminationGracePeriodSeconds: 60
+      containers:
+        - name: sset-ue-1
+          image: sset-5g-uerancn:v1.0
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["NET_ADMIN"]
+          imagePullPolicy: IfNotPresent
+          #imagePullPolicy: Always
+          env:
+            - name: INITAL_SUPI
+              value: 'imsi-901700000000001'
+          command: ["/bin/bash", "-c",]
+          args:
+            - echo "UE starting";
+              cp /usr/local/install/SSET/cnf/5G/ueran/sset5g-ue-tmp.yaml /usr/local/install/SSET/cnf/5G/ueran/sset5g-ue.yaml;
+              sed -i 's|INITAL_SUPI|'$INITAL_SUPI'|g' /usr/local/install/SSET/cnf/5G/ueran/sset5g-ue.yaml;
+              /bin/bash sset_5g_ueran_tools.sh ue -Y -n 4 
+          volumeMounts:
+            - name: dev-net-tun
+              mountPath: /dev/net/tun
+            - name: sset5g-ue-config
+              mountPath: /usr/local/install/SSET/cnf/5G/ueran/sset5g-ue-tmp.yaml
+              subPath: "sset5g-ue-tmp.yaml"            
+      volumes:
+        - name: dev-net-tun
+          hostPath:
+            path: /dev/net/tun
+        - name: sset5g-ue-config
+          configMap:
+            name: ue-config    
+            items:
+            - key: ue.yaml
+              path: sset5g-ue-tmp.yaml

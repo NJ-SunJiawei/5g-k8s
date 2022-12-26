@@ -1,0 +1,42 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: StatefulSet 
+metadata:
+  name: gnb-deploy
+  namespace: sset-5g-simulation
+  labels:
+    ngc-mode: gnb
+spec:
+  replicas: 3
+  serviceName: "gnb-svc-pool"
+  selector:
+    matchLabels:
+      ngc-mode: gnb
+  template:
+    metadata:          
+      labels:
+        ngc-mode: gnb
+    spec:
+      #terminationGracePeriodSeconds: 60
+      containers:
+        - name: sset-gnb
+          image: sset-5g-uerancn:v1.0
+          imagePullPolicy: IfNotPresent
+          #imagePullPolicy: Always
+          env:
+            - name: GNB_ADDR
+              value: $(host -4 gnb-svc-pool |awk '/has.*address/{print $NF; exit}')
+          command: ["/bin/sh", "-c"]
+          args:
+            - echo "GNB starting";
+              /bin/bash sset_5g_ueran_tools.sh gnb -Y          
+          volumeMounts:
+            - name: sset5g-gnb-config
+              mountPath: /usr/local/install/SSET/cnf/5G/ueran/sset5g-gnb.yaml
+              subPath: "sset5g-gnb.yaml"        
+      volumes:
+        - name: sset5g-gnb-config
+          configMap:
+            name: gnb-config    
+            items:
+            - key: gnb.yaml
+              path: sset5g-gnb.yaml

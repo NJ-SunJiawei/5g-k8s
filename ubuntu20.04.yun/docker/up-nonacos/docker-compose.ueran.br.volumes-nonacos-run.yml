@@ -1,0 +1,54 @@
+version: '3'
+
+services:
+  gnbrun0:
+    image: oset-env-base:ubuntu20.04
+    container_name: sset-gnb-bridge-${NR_GNB_IP0}
+    stdin_open: true
+    tty: true
+    env_file:
+      - sset.env
+    volumes:
+      - ./step02-sset/in:/home/ueran
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    expose:
+      - "38412/sctp"
+      - "2152/udp"
+      - "4997/udp"
+    cap_add:
+      - NET_ADMIN
+    privileged: true
+    command: /bin/bash -c "dpkg -i /home/ueran/sset_install/sset/5gueran/nonacos/*.deb; /bin/bash /home/ueran/sset_5g_nr_gnb_local_install.sh ${NR_GNB_IP0} ${AMF_IP0}; /bin/bash /home/ueran/sset_5g_ueran_tools.sh gnb -Y"
+    networks:
+      default:
+        ipv4_address: ${NR_GNB_IP0}
+
+  uerun0:
+    image: oset-env-base:ubuntu20.04
+    container_name: sset-ue-bridge-${NR_UE_IP0}
+    stdin_open: true
+    tty: true
+    env_file:
+      - sset.env
+    volumes:
+      - ./step02-sset/in:/home/ueran
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    expose:
+      - "4997/udp"
+    cap_add:
+      - NET_ADMIN
+    privileged: true
+    depends_on:
+      - gnbrun0
+    command: /bin/bash -c "dpkg -i /home/ueran/sset_install/sset/5gueran/nonacos/*.deb; /bin/bash /home/ueran/sset_5g_nr_ue_local_install.sh ${UE_IMSI0} ${NR_GNB_IP0}; /bin/bash /home/ueran/sset_5g_ueran_tools.sh ue -Y"
+    networks:
+      default:
+        ipv4_address: ${NR_UE_IP0}
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: ${TEST_NETWORK}

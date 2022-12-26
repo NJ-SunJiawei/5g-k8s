@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+  mongorun:
+    build: ./step01-mongo/in
+    image: mongo:ubuntu20.04
+    container_name: mongo-bridge-${MONGO_IP}
+    env_file:
+      - sset.env
+    volumes:
+      - ./step01-mongo/in:/mnt/mongo
+      - mongodbdata:/var/lib/mongodb
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    expose:
+      - "27017/udp"
+      - "27017/tcp"
+    #ports:
+    #  - "27017:27017"
+    networks:
+      default:
+        ipv4_address: ${MONGO_IP}
+    command: /bin/bash -c "/bin/bash /mnt/mongo/mongo_init.sh"
+    
+  webuirun:
+    build: ./step01-webui/in
+    image: webui:ubuntu20.04
+    container_name: webui-bridge-${WEBUI_IP}
+    depends_on:
+      - mongorun
+    env_file:
+      - sset.env
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    expose:
+      - "3000/tcp"
+    ports:
+      - "3000:3000/tcp"
+    networks:
+      default:
+        ipv4_address: ${WEBUI_IP}
+    command: /bin/bash -c "/bin/bash webui_init.sh"
+ 
+volumes:
+  mongodbdata: {}
+ 
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: ${TEST_NETWORK}

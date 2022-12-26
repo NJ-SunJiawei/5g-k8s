@@ -1,0 +1,28 @@
+systemctl  daemon-reload
+
+systemctl  status sset-*查看状态
+systemctl  enable sset-*开机启动
+systemctl  disable sset-*关闭开机启动
+
+systemctl start sset-nrfd
+systemctl start sset-smfd
+systemctl start sset-amfd
+systemctl start sset-upfd
+systemctl start sset-ausfd
+systemctl start sset-udmd
+systemctl start sset-pcfd
+systemctl start sset-nssfd
+systemctl start sset-udrd
+systemctl start sset-bsfd
+
+
+systemctl stop sset-nrfd
+systemctl stop sset-smfd
+systemctl stop sset-amfd
+systemctl stop sset-upfd
+systemctl stop sset-ausfd
+systemctl stop sset-udmd
+systemctl stop sset-pcfd
+systemctl stop sset-nssfd
+systemctl stop sset-udrd
+systemctl stop sset-bsfd

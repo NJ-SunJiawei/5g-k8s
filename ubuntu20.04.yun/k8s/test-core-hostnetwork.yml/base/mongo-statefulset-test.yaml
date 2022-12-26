@@ -1,0 +1,59 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: StatefulSet 
+metadata:
+  name: base-deploy
+  namespace: sset-5g-simulation
+  labels:
+    ngc-mode: mongo
+spec:
+  replicas: 1
+  serviceName: "mongo-node-pool"
+  selector:
+    matchLabels:
+      ngc-mode: mongo
+  template:
+    metadata:          
+      labels:
+        ngc-mode: mongo
+    spec:
+      serviceAccountName: mongo
+      automountServiceAccountToken: true
+      #terminationGracePeriodSeconds: 60
+      containers:
+        - name: mongo
+          image: oset-mongo-simple:v1.0
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "-c"]
+          args:
+            - '/bin/bash mongo_init.sh'
+          ports:
+            - name: mongo-com 
+              containerPort: 27017
+          volumeMounts:
+            - name: mongo-persistent-storage
+              mountPath: /var/lib/mongodb
+        - name: webui
+          image: oset-webui-simple:v1.0
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "-c"]
+          args:
+            - '/bin/bash webui_init.sh'
+          ports:
+            - name: webui-com 
+              containerPort: 3000
+          env:
+            - name: DB_URI
+              value: mongodb://localhost/open5gs       
+      volumes:
+        - name: mongo-persistent-storage
+          emptyDir: {}
+            #medium: Memory
+            #sizeLimit: 100Mi
+      #volumeClaimTemplates:
+        #- metadata:
+            #name: mongo-persistent-storage
+          #spec:
+            #accessModes: [ "ReadWriteOnce" ]
+            #resources:
+               #requests:
+               #storage: 2Gi

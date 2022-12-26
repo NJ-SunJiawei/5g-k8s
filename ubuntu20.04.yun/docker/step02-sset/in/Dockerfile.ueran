@@ -1,0 +1,15 @@
+ARG dist=oset-env-base
+ARG tag=ubuntu20.04
+FROM ${dist}:${tag}
+
+MAINTAINER Sun Jiawei <sunjiawei@nj.ict.ac.cn>
+
+WORKDIR /home
+COPY sset_install /home/sset_install
+COPY iperf .
+COPY sset_5g_ueran_tools.sh .
+
+RUN chmod 777 sset_5g_ueran_tools.sh && \
+    dpkg -i sset_install/oset/*.deb && \
+    dpkg -i sset_install/sset/5gueran/nacos/*.deb && \
+	rm -rf sset_install

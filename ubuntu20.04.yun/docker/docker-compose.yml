@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  oset:
+    build:
+      context: ./step01-oset/in
+      args:
+        dist: env-base
+        tag: ubuntu20.04
+    image: oset-env-base:ubuntu20.04
+    command: /bin/bash -c "echo 'oset' services"
+
+  sset-cn:
+    build:
+      context: ./step02-sset/in
+      args:
+        dist: oset-env-base
+        tag: ubuntu20.04
+    image: sset-cn-base:v1.0.1-1
+    depends_on:
+      - oset
+    command: /bin/bash -c "echo 'sset-cn:' services"
+
+  sset-ueran:
+    build:
+      context: ./step02-sset/in
+      args:
+        dist: oset-env-base
+        tag: ubuntu20.04
+    image: sset-ueran-base:v1.0.1-1
+    depends_on:
+      - oset
+    command: /bin/bash -c "echo 'sset-ueran' services"
